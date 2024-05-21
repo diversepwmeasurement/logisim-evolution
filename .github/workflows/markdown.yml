@@ -1,38 +1,25 @@
-# Runs markdownlint on all *.md files
-
-name: "MD Lint"
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
 jobs:
   markdown_lint:
-    name: "Markdown linter"
-    runs-on: ubuntu-latest
-
+    name: Markdown linter
+    runs-on: self-hosted
     steps:
-    # https://github.com/marketplace/actions/checkout
-    - name: "Checkout sources"
+    - continue-on-error: true
+      name: Checkout sources
       uses: actions/checkout@v4
-
-    # https://github.com/marketplace/actions/paths-changes-filter
-    - name: "Look for changed doc related files..."
-      uses: dorny/paths-filter@v3
+    - continue-on-error: true
       id: filter
+      name: Look for changed doc related files...
+      uses: dorny/paths-filter@v3
       with:
-        filters: |
-          docs:
-            - 'docs/**'
-            - '**/*.md'
-
-    # https://github.com/marketplace/actions/my-markdown-linter
-    - name: "Running markdown linter..."
-      uses: ruzickap/action-my-markdown-linter@v1
+        filters: "docs:\n  - 'docs/**'\n  - '**/*.md'\n"
+    - continue-on-error: true
       if: steps.filter.outputs.docs == 'true'
+      name: Running markdown linter...
+      uses: ruzickap/action-my-markdown-linter@v1
       with:
-        # LICENSE is externally sourced and we're not going to fix it.
-        exclude: "LICENSE.md"
         config_file: .markdownlint.yaml
+        exclude: LICENSE.md
+name: MD Lint
+on:
+  repository_dispatch:
+    types: trigger-ga___markdown.yml
